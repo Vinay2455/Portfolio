@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vinay — Video Editor</title>
+<meta name="description" content="Vinay is a mobile-first video editor focused on storytelling, slow cuts, pacing and sound design.">
+<style>
+:root {
+  --bg: #090a0c;
+  --panel: #14161a;
+  --panel-hover: #1a1e24;
+  --line: #2a2d34;
+  --text: #f3f3ef;
+  --muted: #a7abb4;
+  --gold: #c9a96e;
+  --gold-glow: rgba(201, 169, 110, 0.25);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+}
+a { color: inherit; text-decoration: none; }
+.wrap { width: min(1200px, 92%); margin: auto; }
+
+/* Navigation */
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: .92rem;
+}
+.brand { font-weight: 800; letter-spacing: .14em; font-size: 1.1rem; }
+.navlinks { display: flex; gap: 28px; color: var(--muted); }
+.navlinks a:hover { color: var(--text); }
+.eyebrow {
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: .2em;
+  font-size: .76rem;
+  font-weight: 700;
+}
+
+/* Hero */
+.hero {
+  min-height: 75vh;
+  display: grid;
+  align-content: center;
+  padding: 70px 0;
+  background: radial-gradient(ellipse at 85% 35%, #2a2318 0%, #111216 35%, var(--bg) 70%);
+}
+h1 {
+  font-size: clamp(3.2rem, 9vw, 7.2rem);
+  line-height: .93;
+  letter-spacing: -.06em;
+  margin: 20px 0;
+}
+h1 span { color: var(--gold); }
+.lead {
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  color: var(--muted);
+  max-width: 650px;
+}
+.actions { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 28px; }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--gold);
+  padding: 12px 22px;
+  font-weight: 700;
+  font-size: .9rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all .2s ease;
+  background: transparent;
+  color: var(--text);
+}
+.btn.primary {
+  background: var(--gold);
+  color: #0c0d10;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px var(--gold-glow);
+}
+.btn.primary:hover {
+  background: #d8b87e;
+}
+
+/* Section */
+.section { padding: 80px 0; border-top: 1px solid var(--line); }
+h2 {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 1.08;
+  letter-spacing: -.04em;
+  margin: 10px 0 16px;
+}
+.muted { color: var(--muted); }
+
+/* Video Reel Grid */
+.work-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+}
+.reel-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+  position: relative;
+}
+.reel-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(201, 169, 110, 0.6);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 24px var(--gold-glow);
+}
+
+/* 9:16 Vertical Video Player */
+.video-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  background: #000;
+  overflow: hidden;
+  border-bottom: 1px solid var(--line);
+}
+.video-frame video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: #000;
+}
+.reel-pill {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(9, 10, 12, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--gold);
+  border: 1px solid rgba(201, 169, 110, 0.35);
+  padding: 4px 10px;
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  border-radius: 20px;
+  z-index: 3;
+  pointer-events: none;
+}
+.aspect-toggle {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(9, 10, 12, 0.78);
+  backdrop-filter: blur(8px);
+  color: var(--muted);
+  border: 1px solid var(--line);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: .7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 3;
+  transition: color .2s, border-color .2s;
+}
+.aspect-toggle:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+.play-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity .25s ease, background .25s ease;
+  z-index: 2;
+}
+.video-frame.is-playing .play-overlay {
+  opacity: 0;
+  pointer-events: none;
+}
+.play-icon-bubble {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  transition: transform .2s ease, background .2s ease;
+}
+.play-icon-bubble svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+  margin-left: 3px;
+}
+.play-overlay:hover .play-icon-bubble {
+  transform: scale(1.12);
+  background: #f3f3ef;
+}
+
+/* Card Content */
+.reel-body {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  justify-content: space-between;
+}
+.reel-num {
+  color: var(--gold);
+  font-size: .74rem;
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+.reel-title {
+  margin: 6px 0 6px;
+  font-size: 1.18rem;
+  letter-spacing: -.02em;
+}
+.reel-desc {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: .86rem;
+  line-height: 1.45;
+}
+.reel-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+  font-size: .8rem;
+  color: var(--muted);
+}
+.change-file-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: .75rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px dashed var(--line);
+  transition: all .2s;
+}
+.change-file-label:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+.hidden-file-input { display: none; }
+
+/* Skills & About */
+.skills {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 28px;
+}
+.skill {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  padding: 18px;
+  border-radius: 8px;
+  transition: border-color .2s;
+}
+.skill:hover { border-color: var(--gold); }
+.skill b { display: block; font-size: 1.05rem; }
+.skill small { color: var(--muted); font-size: .85rem; }
+.about { max-width: 760px; font-size: 1.1rem; line-height: 1.7; }
+
+/* Contact */
+.contactbox {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 34px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+/* Footer */
+.footer {
+  padding: 28px 0;
+  color: var(--muted);
+  font-size: .85rem;
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid var(--line);
+}
+
+/* Responsive */
+@media(max-width: 1024px) {
+  .work-grid { grid-template-columns: repeat(2, 1fr); }
+  .skills { grid-template-columns: repeat(2, 1fr); }
+}
+@media(max-width: 640px) {
+  .work-grid { grid-template-columns: 1fr; max-width: 360px; margin: auto; }
+  .contactbox { flex-direction: column; align-items: flex-start; }
+  .navlinks { gap: 14px; font-size: .82rem; }
+  .skills { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<header class="wrap nav">
+  <a class="brand" href="#">VINAY<span style="color:var(--gold)">.</span></a>
+  <nav class="navlinks">
+    <a href="#work">Work</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<main>
+  <!-- Hero Section -->
+  <section class="wrap hero">
+    <div class="eyebrow">Mobile-first video editor</div>
+    <h1>Every cut.<br><span>A feeling.</span></h1>
+    <p class="lead">I shape footage into engaging stories through intentional pacing, cinematic slow cuts, and impactful sound design. Fast, energetic edits are part of my toolkit too — when the story calls for it.</p>
+    <div class="actions">
+      <a class="btn primary" href="#work">Explore selected work ↓</a>
+      <a class="btn" id="instagramHero" href="#contact">Instagram ↗</a>
+    </div>
+  </section>
+
+  <!-- Work Showcase (Vertical 9:16 Reels) -->
+  <section class="section" id="work">
+    <div class="wrap">
+      <div class="work-header">
+        <div>
+          <div class="eyebrow">01 / Selected work</div>
+          <h2>Made to be felt.<br>Edited to be remembered.</h2>
+          <p class="muted" style="margin-top:6px; max-width:620px;">
+            Vertical 9:16 mobile edits showcasing deliberate pacing, cinematic mood, layered sound design, and rhythm. Click any video to play with sound.
+          </p>
+        </div>
+        <div class="muted" style="font-size:0.85rem;">
+          Tap video to play · Auto-mutes others
+        </div>
+      </div>
+
+      <div class="work-grid">
+
+        <!-- Project 01 -->
+        <article class="reel-card">
+          <div class="video-frame" id="frame-1">
+            <span class="reel-pill">9:16 REEL · CAPCUT</span>
+            <button class="aspect-toggle" title="Toggle full-fit / fill view" onclick="toggleFit(1)">⛶</button>
+            <video id="video-1" playsinline controls preload="metadata" src="lv_0_20261007012431.mp4"></video>
+            <div class="play-overlay" onclick="togglePlay(1)">
+              <div class="play-icon-bubble">
+                <svg viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+              </div>
+            </div>
+          </div>
+          <div class="reel-body">
+            <div>
+              <div class="reel-num">PROJECT 01 / CINEMATIC</div>
+              <h3 class="reel-title">Atmosphere & Slow Cuts</h3>
+              <p class="reel-desc">Deliberate pacing, gentle motion, and moody color tone crafted to let each frame breathe and evoke quiet emotion.</p>
+            </div>
+            <div class="reel-footer">
+              <span id="name-1" title="lv_0_20261007012431.mp4">lv_0_202610...mp4</span>
+              <label class="change-file-label" title="Select another video file from your computer">
+                <span>Swap video</span>
+                <input type="file" accept="video/*" class="hidden-file-input" onchange="swapVideo(this, 1)">
+              </label>
+            </div>
+          </div>
+        </article>
+
+        <!-- Project 02 -->
+        <article class="reel-card">
+          <div class="video-frame" id="frame-2">
+            <span class="reel-pill">9:16 REEL · STORY</span>
+            <button class="aspect-toggle" title="Toggle full-fit / fill view" onclick="toggleFit(2)">⛶</button>
+            <video id="video-2" playsinline controls preload="metadata" src="lv_0_20260120163840.mp4"></video>
+            <div class="play-overlay" onclick="togglePlay(2)">
+              <div class="play-icon-bubble">
+                <svg viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+              </div>
+            </div>
+          </div>
+          <div class="reel-body">
+            <div>
+              <div class="reel-num">PROJECT 02 / STORYTELLING</div>
+              <h3 class="reel-title">Narrative & Emotional Build</h3>
+              <p class="reel-desc">A structured visual journey with a clear beginning, deliberate tension, and satisfying visual culmination.</p>
+            </div>
+            <div class="reel-footer">
+              <span id="name-2" title="lv_0_20260120163840.mp4">lv_0_202601...mp4</span>
+              <label class="change-file-label" title="Select another video file from your computer">
+                <span>Swap video</span>
+                <input type="file" accept="video/*" class="hidden-file-input" onchange="swapVideo(this, 2)">
+              </label>
+            </div>
+          </div>
+        </article>
+
+        <!-- Project 03 -->
+        <article class="reel-card">
+          <div class="video-frame" id="frame-3">
+            <span class="reel-pill">9:16 REEL · ALIGHT MOTION</span>
+            <button class="aspect-toggle" title="Toggle full-fit / fill view" onclick="toggleFit(3)">⛶</button>
+            <video id="video-3" playsinline controls preload="metadata" src="lv_0_20260112184900.mp4"></video>
+            <div class="play-overlay" onclick="togglePlay(3)">
+              <div class="play-icon-bubble">
+                <svg viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+              </div>
+            </div>
+          </div>
+          <div class="reel-body">
+            <div>
+              <div class="reel-num">PROJECT 03 / SOUND DESIGN</div>
+              <h3 class="reel-title">SFX & Dynamic Audio</h3>
+              <p class="reel-desc">Layered sound effects, whooshes, risers, and impact hits synced tightly to visual movements to enhance sensory weight.</p>
+            </div>
+            <div class="reel-footer">
+              <span id="name-3" title="lv_0_20260112184900.mp4">lv_0_202601...mp4</span>
+              <label class="change-file-label" title="Select another video file from your computer">
+                <span>Swap video</span>
+                <input type="file" accept="video/*" class="hidden-file-input" onchange="swapVideo(this, 3)">
+              </label>
+            </div>
+          </div>
+        </article>
+
+        <!-- Project 04 -->
+        <article class="reel-card">
+          <div class="video-frame" id="frame-4">
+            <span class="reel-pill">9:16 REEL · RHYTHM</span>
+            <button class="aspect-toggle" title="Toggle full-fit / fill view" onclick="toggleFit(4)">⛶</button>
+            <video id="video-4" playsinline controls preload="metadata" src="20261002_010307.mp4"></video>
+            <div class="play-overlay" onclick="togglePlay(4)">
+              <div class="play-icon-bubble">
+                <svg viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+              </div>
+            </div>
+          </div>
+          <div class="reel-body">
+            <div>
+              <div class="reel-num">PROJECT 04 / FAST CUTS</div>
+              <h3 class="reel-title">Energy, Rhythm & Beat Sync</h3>
+              <p class="reel-desc">Fast-paced, music-driven cuts with seamless transitions and high-energy sequence timing designed for retention.</p>
+            </div>
+            <div class="reel-footer">
+              <span id="name-4" title="20261002_010307.mp4">20261002_01...mp4</span>
+              <label class="change-file-label" title="Select another video file from your computer">
+                <span>Swap video</span>
+                <input type="file" accept="video/*" class="hidden-file-input" onchange="swapVideo(this, 4)">
+              </label>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section class="section" id="about">
+    <div class="wrap">
+      <div class="eyebrow">02 / About</div>
+      <h2>Thoughtful editing.<br>Human stories.</h2>
+      <p class="about">
+        I’m a mobile-first video editor with nearly two years of hands-on experience in CapCut and Alight Motion. My main strengths are slow cuts, story building, pacing, and sound effects. I can also handle fast-cut edits when a project needs more energy. I have basic knowledge of Adobe Premiere Pro and DaVinci Resolve, and I’m continuing to grow my workflow.
+      </p>
+      <div class="skills">
+        <div class="skill">
+          <b>CapCut</b>
+          <small>Hands-on experience</small>
+        </div>
+        <div class="skill">
+          <b>Alight Motion</b>
+          <small>Hands-on experience</small>
+        </div>
+        <div class="skill">
+          <b>Premiere Pro</b>
+          <small>Basic knowledge</small>
+        </div>
+        <div class="skill">
+          <b>DaVinci Resolve</b>
+          <small>Basic knowledge</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="section" id="contact">
+    <div class="wrap">
+      <div class="eyebrow">03 / Contact</div>
+      <div class="contactbox">
+        <div>
+          <h2>Have a story to tell?</h2>
+          <p class="muted">Let’s make something that feels right.</p>
+          <p id="contactDetails" class="muted" style="margin-top:10px;">
+            Instagram: @mr_vinaypatel_ · Email: Vinaypatel630957@gmail.com
+          </p>
+        </div>
+        <div class="actions">
+          <a class="btn primary" id="instagramContact" href="#">Instagram ↗</a>
+          <a class="btn" id="emailLink" href="mailto:">Email ↗</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap footer">
+  <span>© <span id="year"></span> VINAY / VIDEO EDITOR</span>
+  <span>Built around story, rhythm & sound.</span>
+</footer>
+
+<script>
+// Dynamic year
+document.getElementById('year').textContent = new Date().getFullYear();
+
+// Instagram and Email configuration
+const INSTAGRAM_URL = "https://www.instagram.com/mr_vinaypatel_";
+const EMAIL_ADDRESS = "Vinaypatel630957@gmail.com";
+
+if (INSTAGRAM_URL) {
+  ['instagramHero', 'instagramContact'].forEach(id => {
+    const a = document.getElementById(id);
+    if (a) {
+      a.href = INSTAGRAM_URL;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+    }
+  });
+}
+
+if (EMAIL_ADDRESS) {
+  const emailLink = document.getElementById('emailLink');
+  if (emailLink) emailLink.href = 'mailto:' + EMAIL_ADDRESS;
+  const contactDetails = document.getElementById('contactDetails');
+  if (contactDetails) {
+    contactDetails.textContent = `Instagram: @mr_vinaypatel_ · Email: ${EMAIL_ADDRESS}`;
+  }
+}
+
+// Single audio stream management (only 1 video plays at a time)
+const allVideos = document.querySelectorAll('video');
+
+allVideos.forEach(vid => {
+  vid.addEventListener('play', () => {
+    allVideos.forEach(other => {
+      if (other !== vid && !other.paused) {
+        other.pause();
+      }
+    });
+    const parentFrame = vid.closest('.video-frame');
+    if (parentFrame) parentFrame.classList.add('is-playing');
+  });
+
+  vid.addEventListener('pause', () => {
+    const parentFrame = vid.closest('.video-frame');
+    if (parentFrame) parentFrame.classList.remove('is-playing');
+  });
+
+  vid.addEventListener('ended', () => {
+    const parentFrame = vid.closest('.video-frame');
+    if (parentFrame) parentFrame.classList.remove('is-playing');
+  });
+});
+
+// Toggle play via overlay button
+function togglePlay(id) {
+  const vid = document.getElementById('video-' + id);
+  if (!vid) return;
+  if (vid.paused) {
+    vid.play().catch(e => {
+      console.warn("Playback error:", e);
+    });
+  } else {
+    vid.pause();
+  }
+}
+
+// Toggle between object-fit: cover and contain
+function toggleFit(id) {
+  const vid = document.getElementById('video-' + id);
+  if (!vid) return;
+  vid.style.objectFit = (vid.style.objectFit === 'contain') ? 'cover' : 'contain';
+}
+
+// Swap video file interactively from local file picker
+function swapVideo(input, id) {
+  if (input.files && input.files[0]) {
+    const file = input.files[0];
+    const objectUrl = URL.createObjectURL(file);
+    const vid = document.getElementById('video-' + id);
+    const label = document.getElementById('name-' + id);
+    if (vid) {
+      vid.src = objectUrl;
+      vid.load();
+      vid.play().catch(() => {});
+    }
+    if (label) {
+      const truncated = file.name.length > 15 ? file.name.substring(0, 12) + '...' + file.name.split('.').pop() : file.name;
+      label.textContent = truncated;
+      label.title = file.name;
+    }
+  }
+}
+</script>
+</body>
+</html>
